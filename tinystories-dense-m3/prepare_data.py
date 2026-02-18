@@ -21,7 +21,7 @@ print("Loading dataset...")
 dataset = load_dataset(dataset_name)
 
 #The tokenizer (gpt-2 BPE)
-enc = tiktoken.get_encoding("gpt-2")
+enc = tiktoken.get_encoding("gpt2")
 
 def process(example):
     ids = enc.encode_ordinary(example["text"])
