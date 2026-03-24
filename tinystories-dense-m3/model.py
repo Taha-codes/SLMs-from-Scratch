@@ -10,14 +10,13 @@ class Head(nn.Module):
         super().__init__()
 
         # nn.Linear(in_features, out_features)
-        # nn.Linear is the PyTorch version of multiply input by a 
-        # learned weight matrix
+        # nn.Linear is the PyTorch version of multiply input by a  learned weight matrix
 
         #self.x attributes are things you keep and use later
 
-        self.key = nn.Linear(d_embd, head_size, bias = False)   #key weight matrix
-        self.query = nn.Linear(d_embd, head_size, bias = False) #query weight matrix
-        self.value = nn.Linear(d_embd, head_size, bias = False) #value weight matrix
+        self.key = nn.Linear(d_embd, head_size, bias = False)    #key weight matrix
+        self.query = nn.Linear(d_embd, head_size, bias = False)  #query weight matrix
+        self.value = nn.Linear(d_embd, head_size, bias = False)  #value weight matrix
         self.dropout = nn.Dropout(dropout)
         self.register_buffer(
             'tril', 
