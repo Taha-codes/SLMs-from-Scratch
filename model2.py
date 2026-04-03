@@ -22,8 +22,7 @@ class PositionalEncoding(nn.Module):
         self.d_model = d_model
         self.seq_len = seq_len
         self.dropout = nn.Dropout(dropout)
-    
-        # create a matrix of shape (sed_len, d_model)
+            # create a matrix of shape (sed_len, d_model)
         pe = torch.zeros(seq_len, d_model) 
 
         # create a vector that will represent the position of the word inside a sentence (seq_len)
