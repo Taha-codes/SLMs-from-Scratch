@@ -80,6 +80,19 @@ class MultiHeadAttention(nn.Module):
         return self.W_o(x)
 
 
+class FFN(nn.Module):
+    def __init__(self, d_model: int, d_ff:int, dropout):
+        super().__init__()
 
-
+        self.layer1 = nn.Linear(d_model, d_ff)
+        self.gelu = nn.GELU()
+        self.dropout = nn.Dropout(dropout)
+        self.layer2 = nn.Linear(d_ff, d_model)
+    
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.gelu(x)
+        x = self.dropout(x)
+        
+        return self.layer2(x)
 
