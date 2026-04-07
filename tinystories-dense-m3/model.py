@@ -96,3 +96,34 @@ class FFN(nn.Module):
         
         return self.layer2(x)
 
+class DecoderBlock(nn.Module):
+    def __init__(self, d_model: int, n_heads: int, d_ff: int, dropout: float):
+        super().__init__()
+
+        self.pre_norm1 = nn.LayerNorm(d_model)
+        self.multi_head_att = MultiHeadAttention(d_model, n_heads, dropout)
+        self.pre_norm2 = nn.LayerNorm(d_model)
+        self.ffn = FFN(d_model, d_ff, dropout)
+
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x, mask):
+
+        residual = x
+
+        x = self.pre_norm1(x)
+        x = self.multi_head_att(x, mask)
+        x = self.dropout(x)
+
+        x = x + residual
+
+        residual = x
+
+        x = self.pre_norm2(x)
+        x = self.ffn(x)
+        x = self.dropout(x)
+
+        x = x + residual
+
+        return x
+
