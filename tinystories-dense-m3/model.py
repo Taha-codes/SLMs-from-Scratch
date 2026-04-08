@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 import math
+import lightning as L
+import torch.nn.functional as F
+from transformers import AutoTokenizer
 
 class TokenEmbedding(nn.Module):
     def __init__(self, vocab_size:int, d_model:int): #where we define the layers and parameters
@@ -28,7 +31,7 @@ class PositionalEncoding(nn.Module):
 
         self.register_buffer('pe', pe)  # fixed, not a learned parameter
     
-    def forward(x, self):
+    def forward(self, x):
         x = x + self.pe[:, :x.shape[1], :]  # add position to each token
         return self.dropout(x)
 
@@ -141,15 +144,42 @@ class GPT(nn.Module):
         self.final_norm = nn.LayerNorm(d_model)
         self.lm_head = nn.Linear(d_model, vocab_size)
         
-    def forward(self, x):
+    def forward(self, x, mask = None):
         x = self.tok_emb(x)
 
         x = self.pos_emb(x)
 
         for block in self.blocks:
-            x = block(x, self.mask)
+            x = block(x, mask)
         
         x = self.final_norm(x)
         logits = self.lm_head(x)
 
         return logits
+
+class LitGPT(L.LightningModule):
+    def __init__(self, gpt_model: nn.Module):
+        super().__init__()
+        self.model = gpt_model
+
+    def forward(self, x, mask = None):
+        return self.model(x, mask)
+    
+    def _calculate_loss(self, batch):
+        inputs, targets = batch
+        logits = self(inputs)
+        loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
+        return loss
+    def training_step(self, batch, batch_idx):
+        loss = self._calculate_loss(batch)
+        self.log("train_loss", loss, prog_bar=True)
+        return loss
+    def validation_step(self, batch, batch_idx):
+        loss = self._calculate_loss(batch)
+        # prog_bar=True makes Lightning print this on your terminal progress bar!
+        self.log("val_loss", loss, prog_bar=True)
+        return loss
+    def configure_optimizers(self):
+        optimizer = torch.optim.AdamW(self.model.parameters(), lr=3e-4)
+        return optimizer
+
