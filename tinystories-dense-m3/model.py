@@ -79,7 +79,6 @@ class MultiHeadAttention(nn.Module):
         
         return self.W_o(x)
 
-
 class FFN(nn.Module):
     def __init__(self, d_model: int, d_ff:int, dropout):
         super().__init__()
@@ -127,3 +126,30 @@ class DecoderBlock(nn.Module):
 
         return x
 
+class GPT(nn.Module):
+    def __init__(self, vocab_size:int, d_model:int, 
+                n_heads:int, d_ff:int, seq_len:int, num_layers:int, dropout: float=0.1):
+        super().__init__()
+
+        self.tok_emb = TokenEmbedding(vocab_size, d_model)
+        self.pos_emb = PositionalEncoding(d_model, seq_len, dropout)
+
+        self.blocks = nn.ModuleList([
+            DecoderBlock(d_model, n_heads, d_ff, dropout) for _ in range(num_layers)
+        ])
+
+        self.final_norm = nn.LayerNorm(d_model)
+        self.lm_head = nn.Linear(d_model, vocab_size)
+        
+    def forward(self, x):
+        x = self.tok_emb(x)
+
+        x = self.pos_emb(x)
+
+        for block in self.blocks:
+            x = block(x, self.mask)
+        
+        x = self.final_norm(x)
+        logits = self.lm_head(x)
+
+        return logits
