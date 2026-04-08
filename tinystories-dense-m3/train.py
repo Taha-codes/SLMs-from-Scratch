@@ -81,4 +81,4 @@ if __name__ == "__main__":
     # Train
     print("Starting Training!")
     trainer = L.Trainer(max_epochs=1, accelerator="auto")
-    trainer.fit(lit_model, train_dataloader=train_loader)
+    trainer.fit(lit_model, train_dataloaders=train_loader)
