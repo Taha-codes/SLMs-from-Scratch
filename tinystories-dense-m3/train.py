@@ -50,7 +50,7 @@ def prepare_dataloader(seq_len=256, batch_size=32):
     dataset = TinyStoriesDataset(all_tokens, seq_len)
     
     # The DataLoader handles shuffling and grouping into batches automatically!
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=8)
     return dataloader
 
 # 3. The Main Execution
