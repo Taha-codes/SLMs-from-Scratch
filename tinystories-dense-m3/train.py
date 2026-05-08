@@ -1,3 +1,4 @@
+from lightning.pytorch.callbacks import TQDMProgressBar
 import torch
 from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer
@@ -80,5 +81,9 @@ if __name__ == "__main__":
     
     # Train
     print("Starting Training!")
-    trainer = L.Trainer(max_epochs=1, accelerator="auto")
+    trainer = L.Trainer(
+        max_epochs=1, 
+        accelerator="auto", 
+        callbacks=[TQDMProgressBar(refresh_rate=100)] # Only print every 100 batches!
+    )
     trainer.fit(lit_model, train_dataloaders=train_loader)
