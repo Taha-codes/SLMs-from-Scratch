@@ -57,13 +57,13 @@ def prepare_dataloader(split="train", num_stories=50000, seq_len=256, batch_size
 if __name__ == "__main__":
     # Hyperparameters
     SEQ_LEN = 256
-    BATCH_SIZE = 16 
+    BATCH_SIZE = 32 
     VOCAB_SIZE = 50257 # GPT2 standard vocabulary size
     
     # Prepare data
-    # We increased the train stories to 100,000 for a smarter model and lower loss!
+    # We increased the train stories to 20,000 for a smarter model and lower loss!
     train_loader = prepare_dataloader(split="train", num_stories=20000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=True)
-    # We also grab 5,000 stories from the validation split to test the model on unseen data
+    # We also grab 2,000 stories from the validation split to test the model on unseen data
     val_loader = prepare_dataloader(split="validation", num_stories=2000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=False)
     
     # Initialize Model
