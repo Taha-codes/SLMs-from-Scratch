@@ -27,31 +27,30 @@ class TinyStoriesDataset(Dataset):
         return torch.tensor(x, dtype=torch.long), torch.tensor(y, dtype=torch.long)
 
 # Setup the DataPipeline
-def prepare_dataloader(seq_len=256, batch_size=32):
-    print("Loading tokenizer...")
+def prepare_dataloader(split="train", num_stories=50000, seq_len=256, batch_size=32, shuffle=True):
+    print(f"Loading tokenizer and dataset for {split}...")
     tokenizer = AutoTokenizer.from_pretrained("gpt2")
     
-    print("Downloading TinyStories dataset...")
-    # We will just grab the training 'train' split from HuggingFace
-    hf_dataset = load_dataset("roneneldan/TinyStories", split="train")
+    # Grab the requested split from HuggingFace
+    hf_dataset = load_dataset("roneneldan/TinyStories", split=split)
     
-    # grab the first 10,000 stories
-    small_text_dataset = hf_dataset[:10000]['text']
+    # Grab the first N stories
+    small_text_dataset = hf_dataset[:num_stories]['text']
     
-    print("Tokenizing the text...")
-    # We convert the list of 10,000 strings into one massive single string
+    print(f"Tokenizing {num_stories} stories...")
+    # Convert the list of strings into one massive single string
     full_text = " ".join(small_text_dataset)
     
     # Convert the massive string into a massive list of integers
     all_tokens = tokenizer.encode(full_text)
     
-    print(f"Total tokens loaded: {len(all_tokens)}")
+    print(f"Total {split} tokens loaded: {len(all_tokens)}")
 
     # Wrap it in our custom dataset
     dataset = TinyStoriesDataset(all_tokens, seq_len)
     
-    # The DataLoader handles shuffling and grouping into batches automatically!
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=8)
+    # The DataLoader handles batching automatically!
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=4)
     return dataloader
 
 # 3. The Main Execution
@@ -62,7 +61,10 @@ if __name__ == "__main__":
     VOCAB_SIZE = 50257 # GPT2 standard vocabulary size
     
     # Prepare data
-    train_loader = prepare_dataloader(seq_len=SEQ_LEN, batch_size=BATCH_SIZE)
+    # We increased the train stories to 100,000 for a smarter model and lower loss!
+    train_loader = prepare_dataloader(split="train", num_stories=100000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=True)
+    # We also grab 5,000 stories from the validation split to test the model on unseen data
+    val_loader = prepare_dataloader(split="validation", num_stories=5000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=False)
     
     # Initialize Model
     print("Initializing Model...")
@@ -79,11 +81,22 @@ if __name__ == "__main__":
     # Wrap it in PyTorch Lightning
     lit_model = LitGPT(raw_model)
     
+    # Setup Checkpoint Callback to save the model with the lowest validation loss
+    from lightning.pytorch.callbacks import ModelCheckpoint
+    checkpoint_callback = ModelCheckpoint(
+        dirpath='checkpoints',
+        filename='tinystories-{epoch:02d}-{val_loss:.2f}',
+        save_top_k=1,            # Only save the best 1 model
+        monitor='val_loss',      # Monitor validation loss
+        mode='min'               # We want to minimize the loss
+    )
+    
     # Train
     print("Starting Training!")
     trainer = L.Trainer(
         max_epochs=1, 
         accelerator="auto", 
-        callbacks=[TQDMProgressBar(refresh_rate=100)] # Only print every 100 batches!
+        callbacks=[TQDMProgressBar(refresh_rate=100), checkpoint_callback] 
     )
-    trainer.fit(lit_model, train_dataloaders=train_loader)
+    # We pass both the train AND validation dataloaders now!
+    trainer.fit(lit_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
