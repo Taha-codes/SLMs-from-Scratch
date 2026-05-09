@@ -74,7 +74,7 @@ if __name__ == "__main__":
         n_heads=8, 
         d_ff=1024, 
         seq_len=SEQ_LEN, 
-        num_layers=6,    # keeping it small so it runs fast!
+        num_layers=4,    # keeping it small so it runs fast!
         dropout=0.1
     )
     
