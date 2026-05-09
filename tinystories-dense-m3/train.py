@@ -57,7 +57,7 @@ def prepare_dataloader(split="train", num_stories=50000, seq_len=256, batch_size
 if __name__ == "__main__":
     # Hyperparameters
     SEQ_LEN = 256
-    BATCH_SIZE = 128 
+    BATCH_SIZE = 64 
     VOCAB_SIZE = 50257 # GPT2 standard vocabulary size
     
     # Prepare data
