@@ -62,7 +62,7 @@ if __name__ == "__main__":
     
     # Prepare data
     # We increased the train stories to 100,000 for a smarter model and lower loss!
-    train_loader = prepare_dataloader(split="train", num_stories=80000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=True)
+    train_loader = prepare_dataloader(split="train", num_stories=50000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=True)
     # We also grab 5,000 stories from the validation split to test the model on unseen data
     val_loader = prepare_dataloader(split="validation", num_stories=5000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=False)
     
