@@ -62,9 +62,9 @@ if __name__ == "__main__":
     
     # Prepare data
     # We increased the train stories to 20,000 for a smarter model and lower loss!
-    train_loader = prepare_dataloader(split="train", num_stories=20000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=True)
+    train_loader = prepare_dataloader(split="train", num_stories=10000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=True)
     # We also grab 2,000 stories from the validation split to test the model on unseen data
-    val_loader = prepare_dataloader(split="validation", num_stories=2000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=False)
+    val_loader = prepare_dataloader(split="validation", num_stories=1000, seq_len=SEQ_LEN, batch_size=BATCH_SIZE, shuffle=False)
     
     # Initialize Model
     print("Initializing Model...")
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         n_heads=8, 
         d_ff=1024, 
         seq_len=SEQ_LEN, 
-        num_layers=4,    # keeping it small so it runs fast!
+        num_layers=6,    # keeping it small so it runs fast!
         dropout=0.1
     )
     
