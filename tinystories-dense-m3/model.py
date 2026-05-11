@@ -167,13 +167,10 @@ class LitGPT(L.LightningModule):
     
     def _calculate_loss(self, batch):
         inputs, targets = batch
-        b, t = inputs.shape # Get batch size and sequence length
+        b, t = inputs.shape 
         
-        # Create a triangular mask of 1s and 0s
-        # shape: (1, 1, seq_len, seq_len)
         mask = torch.tril(torch.ones(t, t)).view(1, 1, t, t).to(inputs.device)
         
-        # Pass the mask into the model!
         logits = self(inputs, mask=mask)
         
         loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
@@ -184,7 +181,6 @@ class LitGPT(L.LightningModule):
         return loss
     def validation_step(self, batch, batch_idx):
         loss = self._calculate_loss(batch)
-        # prog_bar=True makes Lightning print this on your terminal progress bar!
         self.log("val_loss", loss, prog_bar=True)
         return loss
     def configure_optimizers(self):
